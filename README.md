@@ -4,7 +4,7 @@ A quantitative portfolio optimization web application built for a Senior Seminar
 
 ## Overview
 
-This application provides professional-grade portfolio optimization using mean-variance analysis. Users can input a list of assets, select a risk profile, and receive optimized portfolio allocations with comprehensive risk metrics.
+This application provides student-grade portfolio optimization using mean-variance analysis. Users can input a list of assets, select a risk profile, and receive optimized portfolio allocations with comprehensive risk metrics.
 
 **Disclaimer:** This tool is for educational purposes only. It is not financial advice.
 
