@@ -6,19 +6,45 @@ from typing import List, Tuple, Dict
 
 
 def fetch_price_data(tickers: List[str], start_date: str, end_date: str) -> pd.DataFrame:
-    """Fetch adjusted close prices for given tickers."""
+    """Fetch close prices for given tickers (prefers adjusted close when available)."""
     data = yf.download(tickers, start=start_date, end=end_date, progress=False)
-    
-    if len(tickers) == 1:
-        prices = data["Adj Close"].to_frame(tickers[0])
+
+    # yfinance may or may not provide "Adj Close" depending on version/params/assets.
+    price_field = None
+    if isinstance(data.columns, pd.MultiIndex):
+        for candidate in ["Adj Close", "Close"]:
+            if candidate in data.columns.get_level_values(0):
+                price_field = candidate
+                break
     else:
-        prices = data["Adj Close"]
-    
-    prices = prices.dropna()
-    
-    if prices.empty:
-        raise ValueError("No price data available for the given date range")
-    
+        for candidate in ["Adj Close", "Close"]:
+            if candidate in data.columns:
+                price_field = candidate
+                break
+
+    if price_field is None:
+        available = (
+            list(dict.fromkeys(data.columns.get_level_values(0)))
+            if isinstance(data.columns, pd.MultiIndex)
+            else list(data.columns)
+        )
+        raise ValueError(
+            f"No 'Adj Close' or 'Close' prices returned. Available fields: {available}"
+        )
+
+    if len(tickers) == 1:
+        # For a single ticker, yfinance can return either a Series/DataFrame depending on shape.
+        series_or_df = data[price_field]
+        prices = series_or_df.to_frame(tickers[0]) if not isinstance(series_or_df, pd.DataFrame) else series_or_df
+        prices.columns = [tickers[0]]
+    else:
+        prices = data[price_field]
+
+    prices = prices.dropna(how="any")
+
+    if prices.empty or prices.shape[0] < 2:
+        raise ValueError("No sufficient price data available for the given date range")
+
     return prices
 
 
