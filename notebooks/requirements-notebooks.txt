@@ -1,0 +1,6 @@
+# Optional: install in the same venv as backend for analysis notebooks
+# pip install -r requirements-notebooks.txt
+jupyter
+ipykernel
+matplotlib
+seaborn

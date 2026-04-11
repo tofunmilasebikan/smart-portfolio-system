@@ -5,12 +5,15 @@ import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TOUR_STEPS } from "@/components/tour/tour-steps";
-import { cn } from "@/lib/utils";
 
 type ProductTourProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+/** Footer controls need icons to receive clicks — base Button uses [&_svg]:pointer-events-none which can break hit-testing on some browsers. */
+const tourBtnClass =
+  "[&_svg]:pointer-events-auto [&_svg]:shrink-0";
 
 export function ProductTour({ open, onOpenChange }: ProductTourProps) {
   const [stepIndex, setStepIndex] = useState(0);
@@ -23,7 +26,6 @@ export function ProductTour({ open, onOpenChange }: ProductTourProps) {
   const step = TOUR_STEPS[stepIndex];
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === TOUR_STEPS.length - 1;
-  const hasTarget = Boolean(step?.target);
 
   const clearHighlights = useCallback(() => {
     document.querySelectorAll("[data-tour-highlight]").forEach((el) => {
@@ -84,34 +86,32 @@ export function ProductTour({ open, onOpenChange }: ProductTourProps) {
     setStepIndex((i) => Math.max(0, i - 1));
   };
 
-  if (!mounted || !open) return null;
+  if (!mounted || !open || !step) return null;
 
   const tooltip = (
     <div
-      className="fixed inset-0 z-[100] pointer-events-none"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 sm:p-6"
+      style={{ isolation: "isolate" }}
       aria-modal="true"
       role="dialog"
       aria-labelledby="tour-step-title"
     >
-      {/* Block interaction with the app; transparent so spotlight remains visible */}
-      <div className="absolute inset-0 bg-transparent pointer-events-auto" />
-
-      {/* 
-        Fixed panel with max-height + scroll so long steps never clip off-screen.
-        Spotlight steps anchor to bottom; intro/outro center in the viewport.
-      */}
+      {/* Layer 1: block clicks to the page (below dialog) */}
       <div
-        className={cn(
-          "pointer-events-auto fixed z-[110] flex max-h-[min(88vh,40rem)] w-[min(calc(100vw-1.5rem),32rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl",
-          hasTarget
-            ? "bottom-6 left-1/2 -translate-x-1/2"
-            : "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        )}
+        className="absolute inset-0 z-0 bg-transparent pointer-events-auto"
+        aria-hidden
+      />
+
+      {/* Layer 2: modal — must be above the full-screen layer so buttons always receive clicks */}
+      <div
+        className="relative z-10 flex max-h-[min(88vh,40rem)] w-[min(calc(100vw-1.5rem),32rem)] flex-col overflow-hidden rounded-2xl border-2 border-[#1e3a5f]/25 bg-white shadow-[0_25px_50px_-12px_rgba(15,23,42,0.45)]"
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5">
           <div className="flex items-start gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
-              <Sparkles className="h-4 w-4" aria-hidden />
+              <Sparkles className="h-4 w-4 pointer-events-none" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
               <h2
@@ -128,13 +128,13 @@ export function ProductTour({ open, onOpenChange }: ProductTourProps) {
           </div>
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-white px-5 py-4">
+        <div className="relative z-20 flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white px-5 py-4">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={handleSkip}
-            className="text-slate-500"
+            className={`text-slate-500 ${tourBtnClass}`}
           >
             Skip
           </Button>
@@ -145,7 +145,7 @@ export function ProductTour({ open, onOpenChange }: ProductTourProps) {
               size="sm"
               onClick={handleBack}
               disabled={isFirst}
-              className="gap-1"
+              className={`gap-1 ${tourBtnClass}`}
             >
               <ChevronLeft className="h-4 w-4" />
               Back
@@ -154,10 +154,10 @@ export function ProductTour({ open, onOpenChange }: ProductTourProps) {
               type="button"
               size="sm"
               onClick={handleNext}
-              className="gap-1 bg-[#1e3a5f] hover:bg-[#2d4a6f]"
+              className={`gap-1 bg-[#1e3a5f] hover:bg-[#2d4a6f] ${tourBtnClass}`}
             >
               {isLast ? "Done" : "Next"}
-              {!isLast && <ChevronRight className="h-4 w-4" />}
+              {!isLast && <ChevronRight className="h-4 w-4" aria-hidden />}
             </Button>
           </div>
         </div>

@@ -41,6 +41,7 @@ smart-portfolio-system/
 │   ├── main.py        # API endpoints
 │   ├── optimize.py    # Optimization engine
 │   └── metrics.py     # Risk metrics
+├── notebooks/         # Jupyter analysis notebooks (see notebooks/README.md)
 └── README.md
 ```
 
