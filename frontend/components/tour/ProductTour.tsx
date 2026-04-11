@@ -88,7 +88,7 @@ export function ProductTour({ open, onOpenChange }: ProductTourProps) {
 
   const tooltip = (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 pointer-events-none"
+      className="fixed inset-0 z-[100] pointer-events-none"
       aria-modal="true"
       role="dialog"
       aria-labelledby="tour-step-title"
@@ -96,32 +96,39 @@ export function ProductTour({ open, onOpenChange }: ProductTourProps) {
       {/* Block interaction with the app; transparent so spotlight remains visible */}
       <div className="absolute inset-0 bg-transparent pointer-events-auto" />
 
+      {/* 
+        Fixed panel with max-height + scroll so long steps never clip off-screen.
+        Spotlight steps anchor to bottom; intro/outro center in the viewport.
+      */}
       <div
         className={cn(
-          "pointer-events-auto relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl",
-          hasTarget &&
-            "sm:fixed sm:bottom-10 sm:left-1/2 sm:max-w-lg sm:-translate-x-1/2 sm:translate-y-0"
+          "pointer-events-auto fixed z-[110] flex max-h-[min(88vh,40rem)] w-[min(calc(100vw-1.5rem),32rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl",
+          hasTarget
+            ? "bottom-6 left-1/2 -translate-x-1/2"
+            : "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         )}
       >
-        <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
-            <Sparkles className="h-4 w-4" aria-hidden />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2
-              id="tour-step-title"
-              className="text-base font-semibold text-[#1e3a5f]"
-            >
-              {step.title}
-            </h2>
-            <div className="mt-2">{step.content}</div>
-            <p className="mt-3 text-[11px] text-slate-400">
-              Step {stepIndex + 1} of {TOUR_STEPS.length}
-            </p>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
+              <Sparkles className="h-4 w-4" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2
+                id="tour-step-title"
+                className="text-base font-semibold text-[#1e3a5f]"
+              >
+                {step.title}
+              </h2>
+              <div className="mt-2 text-sm">{step.content}</div>
+              <p className="mt-3 text-[11px] text-slate-400">
+                Step {stepIndex + 1} of {TOUR_STEPS.length}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-white px-5 py-4">
           <Button
             type="button"
             variant="ghost"
