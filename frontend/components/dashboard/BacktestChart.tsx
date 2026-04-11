@@ -29,6 +29,9 @@ export function BacktestChart({ data }: BacktestChartProps) {
     return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
   };
 
+  const tooltipLabel = (label: unknown) =>
+    typeof label === "string" ? formatDate(label) : String(label ?? "");
+
   return (
     <Card className="shadow-sm border-slate-200">
       <CardHeader className="pb-2">
@@ -65,8 +68,8 @@ export function BacktestChart({ data }: BacktestChartProps) {
                   borderRadius: "8px",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                 }}
-                labelFormatter={formatDate}
-                formatter={(value: string) => [`${value}%`, ""]}
+                labelFormatter={tooltipLabel}
+                formatter={(value) => [`${value}%`, ""]}
               />
               <Legend
                 iconType="line"

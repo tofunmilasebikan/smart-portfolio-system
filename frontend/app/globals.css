@@ -124,3 +124,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Product tour spotlight — keeps target readable above overlay */
+[data-tour-highlight="true"] {
+  position: relative;
+  z-index: 102;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 0 0 4px #1e3a5f,
+    0 0 0 9999px rgba(15, 23, 42, 0.72);
+  transition: box-shadow 0.3s ease;
+}
+
+@keyframes tour-invite-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tour-invite-pop {
+  animation: tour-invite-pop 0.55s ease-out;
+}

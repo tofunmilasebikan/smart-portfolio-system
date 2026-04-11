@@ -52,9 +52,9 @@ export function AllocationChart({ data }: AllocationChartProps) {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number, name: string) => [
-                  `${value.toFixed(2)}%`,
-                  name,
+                formatter={(value, name) => [
+                  `${typeof value === "number" ? value.toFixed(2) : "—"}%`,
+                  String(name),
                 ]}
                 contentStyle={{
                   backgroundColor: "#fff",

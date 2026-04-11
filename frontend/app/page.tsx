@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { Sparkles } from "lucide-react";
 import {
   InputPanel,
   MetricsCards,
   AllocationChart,
   BacktestChart,
 } from "@/components/dashboard";
+import { TourInvitePopup, ProductTour } from "@/components/tour";
 import { PortfolioResponse, RiskProfile } from "@/lib/types";
 import { mockPortfolioData } from "@/lib/mock-data";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [portfolioData, setPortfolioData] = useState<PortfolioResponse | null>(
@@ -16,6 +19,11 @@ export default function Home() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tourOpen, setTourOpen] = useState(false);
+
+  const openTour = useCallback(() => {
+    setTourOpen(true);
+  }, []);
 
   const handleSubmit = async (data: {
     tickers: string[];
@@ -64,9 +72,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <TourInvitePopup onStartTour={openTour} tourActive={tourOpen} />
+      <ProductTour open={tourOpen} onOpenChange={setTourOpen} />
+
+      <header
+        className="bg-white border-b border-slate-200 sticky top-0 z-10"
+        data-tour="header"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h1 className="text-xl font-bold text-[#1e3a5f]">
                 Smart Portfolio
@@ -75,8 +89,18 @@ export default function Home() {
                 Quantitative Portfolio Optimization
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={openTour}
+                className="gap-1.5 border-sky-200 bg-sky-50/80 text-[#1e3a5f] hover:bg-sky-100/80 text-xs"
+              >
+                <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                Take a tour
+              </Button>
+              <span className="hidden sm:inline text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">
                 Mean-Variance Optimization
               </span>
             </div>
@@ -86,10 +110,15 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-3">
-            <InputPanel onSubmit={handleSubmit} isLoading={isLoading} />
+          <div className="lg:col-span-3 space-y-4">
+            <div data-tour="input-panel">
+              <InputPanel onSubmit={handleSubmit} isLoading={isLoading} />
+            </div>
 
-            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div
+              data-tour="disclaimer"
+              className="p-3 bg-amber-50 border border-amber-200 rounded-lg"
+            >
               <p className="text-xs text-amber-800">
                 <strong>Disclaimer:</strong> This tool is for educational
                 purposes only. Not financial advice.
@@ -97,7 +126,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="lg:col-span-9 space-y-6">
+          <div className="lg:col-span-9 space-y-6" data-tour="results">
             {error && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-700">
